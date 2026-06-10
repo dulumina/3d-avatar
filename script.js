@@ -442,7 +442,7 @@ async function speakText(text) {
 }
 
 function resumeAudio() {
-    try { if (head && head.audioCtx && head.audioCtx.state === 'suspended') head.audioCtx.resume() } catch(e) {}
+    try { if (head && head.audioCtx && head.audioCtx.state === 'suspended') head.audioCtx.resume() } catch (e) { }
 }
 
 document.addEventListener('click', resumeAudio, { once: true })
@@ -465,7 +465,8 @@ import('https://cdn.jsdelivr.net/npm/@met4citizen/talkinghead@1.7.0/modules/talk
         lightAmbientIntensity: 2.5, lightDirectIntensity: 25,
     })
     return head.showAvatar({
-        url: 'https://cdn.jsdelivr.net/gh/met4citizen/TalkingHead@v1.7.0/avatars/brunette.glb',
+        // url: 'https://cdn.jsdelivr.net/gh/met4citizen/TalkingHead@v1.7.0/avatars/brunette.glb',
+        url: 'https://cdn.jsdelivr.net/gh/met4citizen/TalkingHead@main/avatars/avaturn.glb',
         body: true, ttsLang: 'id-ID', lipsyncLang: 'id-ID', baseline: 1.6,
     })
 }).then(() => {
