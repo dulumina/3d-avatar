@@ -1,0 +1,19 @@
+export const state = {
+    head: null,
+    avatarReady: false,
+    jawMorphName: null,
+    visemeMorphNames: {},
+    isSpeaking: false,
+    mouthActive: false,
+    isAnalyzing: false,
+    mouthAnimFrame: null,
+    speechStartTime: 0,
+    mouthTimeline: [],
+    lastGestureIdx: -1,
+    lastVisemeName: null,
+    availableVoices: [],
+    selectedVoice: null,
+    voicesReady: false,
+    gestureSchedule: [],
+    chromeKeepAliveInterval: null
+}

@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Avatar - 3D Talking Avatar</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div id="container">
         <div id="avatar-container"></div>
         <div id="controls">
-            <textarea id="text-input" placeholder="Ketik teks untuk avatar bicara..." rows="1">Halo! Aku adalah avatar 3D. Aku bisa bicara mengikuti teks yang kamu ketik.</textarea>
+            <textarea id="text-input" placeholder="Ketik teks untuk avatar bicara..." rows="1">Pemerintah Kota Palu menggelar kegiatan penanaman seribu pohon di sejumlah kawasan ruang terbuka hijau pada Kamis pagi. Kegiatan tersebut melibatkan berbagai elemen masyarakat, mulai dari pelajar, komunitas lingkungan, hingga aparatur pemerintah daerah. Wali Kota menyampaikan bahwa program ini bertujuan meningkatkan kualitas udara, mengurangi dampak perubahan iklim, serta menumbuhkan kesadaran masyarakat akan pentingnya menjaga kelestarian lingkungan. Acara berlangsung lancar dan mendapat antusiasme tinggi dari warga yang turut berpartisipasi dalam penanaman pohon di beberapa titik kota.
+            </textarea>
             <div id="voice-controls">
                 <select id="voice-select" title="Pilih suara"></select>
                 <div id="voice-status">Memuat suara...</div>
@@ -24,14 +28,7 @@
         </div>
     </div>
 
-    <script type="importmap">
-    {
-        "imports": {
-            "three": "https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js",
-            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.180.0/examples/jsm/"
-        }
-    }
-    </script>
-    <script type="module" src="script.js?v=3"></script>
+    <script type="module" src="/src/main.js"></script>
 </body>
+
 </html>
