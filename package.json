@@ -18,6 +18,9 @@
   },
   "dependencies": {
     "@met4citizen/talkinghead": "^1.7.0",
+    "@nlpjs/core": "^5.0.0-alpha.5",
+    "@nlpjs/lang-id": "^5.0.0-alpha.5",
+    "@nlpjs/sentiment": "^5.0.0-alpha.5",
     "three": "^0.180.0"
   }
 }

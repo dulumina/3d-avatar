@@ -1,5 +1,6 @@
 import { GEMINI_KEY, GEMINI_MODELS } from './constants.js'
 import { cleanWord } from './utils.js'
+import { sentimentToMood } from './sentiment.js'
 
 const GESTURE_CACHE = new Map()
 
@@ -24,41 +25,13 @@ const KEYWORD_MAP = [
     { words: ['?'], g: 'shrug' },
 ]
 
-const POSITIVE_WORDS = ['bagus', 'hebat', 'mantap', 'senang', 'sukses', 'indah', 'baik', 'suka', 'berhasil', 'luarbiasa', 'keren', 'cinta', 'bangga', 'syukur', 'tumbuh', 'lancar', 'antusias', 'tinggi', 'terima']
-const NEGATIVE_WORDS = ['jelek', 'buruk', 'parah', 'gagal', 'rugi', 'malas', 'bodoh', 'salah', 'keliru', 'sedih', 'kecewa', 'marah', 'benci', 'takut']
-const QUESTION_WORDS = ['apa', 'siapa', 'kenapa', 'mengapa', 'bagaimana', 'kapan', 'berapa', 'dimana', 'kemana', 'darimana', 'apakah']
-
-function detectMood(text) {
-    if (/[?？]/g.test(text)) {
-        const qCount = (text.match(/[?？]/g) || []).length
-        if (qCount > 1) return 'excited'
-        if (QUESTION_WORDS.some(w => text.toLowerCase().includes(w))) return 'excited'
-    }
-    if (/[!！]/g.test(text)) return 'excited'
-    if (text.includes('😊') || text.includes('😄') || text.includes('🥰') || text.includes('😁') || text.includes('😂')) return 'happy'
-    if (text.includes('😢') || text.includes('😭') || text.includes('😞') || text.includes('🥺')) return 'sad'
-    if (text.includes('😡') || text.includes('🤬') || text.includes('😤') || text.includes('😠')) return 'angry'
-
-    const lower = text.toLowerCase()
-    let posScore = 0, negScore = 0
-    for (const w of POSITIVE_WORDS) {
-        if (lower.includes(w)) posScore++
-    }
-    for (const w of NEGATIVE_WORDS) {
-        if (lower.includes(w)) negScore++
-    }
-    if (posScore > negScore && posScore >= 2) return 'happy'
-    if (negScore > posScore) return 'sad'
-    return 'neutral'
-}
-
-export function keywordFallback(text, words) {
+export async function keywordFallback(text, words) {
     const gestures = []
     const lower = text.toLowerCase()
     const wordList = words || lower.split(/\s+/).filter(w => w.length > 0)
     if (wordList.length === 0) return { mood: 'neutral', gestures: [] }
 
-    const mood = detectMood(text)
+    const mood = await sentimentToMood(text)
     const usedIndices = new Set()
     const total = wordList.length
 
@@ -222,15 +195,8 @@ Teks: ${text}`
 export async function getGestureSchedule(text) {
     if (GESTURE_CACHE.has(text)) return GESTURE_CACHE.get(text)
     const words = text.split(/\s+/).filter(w => w.length > 0)
-    let result, lastErr
-    for (const model of GEMINI_MODELS) {
-        try { result = await analyzeTextWithGemini(text, model); lastErr = null; break }
-        catch (e) { lastErr = e; console.warn(`Gemini ${model} failed:`, e.message || e) }
-    }
-    if (!result || !Array.isArray(result.gestures)) {
-        if (lastErr) console.warn('All Gemini models failed, using fallback:', lastErr.message || lastErr)
-        result = keywordFallback(text, words)
-    }
+    // Gemini disabled. Only fallback active.
+    const result = await keywordFallback(text, words)
     GESTURE_CACHE.set(text, result)
     return result
 }
