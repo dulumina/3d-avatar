@@ -168,6 +168,9 @@ export function tickMorphLerp(timestamp) {
             speed = isExpression ? LERP.expression : (s.target < s.current ? LERP.visemeFade : LERP.viseme)
         }
         s.current += (s.target - s.current) * Math.min(1, speed * dt)
+        if (isJaw && s.target < 0.01 && s.current < 0.02) {
+            s.current = 0
+        }
         applyMorphRaw(name, s.current)
     }
 }

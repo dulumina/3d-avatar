@@ -1,7 +1,7 @@
 import { state } from '../state.js'
 import { BLINK_INTERVAL, BLINK_DURATION } from '../constants.js'
 import { microNoise, resetNoiseT } from '../utils.js'
-import { setJawOpen, setMorphTarget, ensureMorphState, releaseMorph, startMorphLerp, morphState, morphMap } from './morph.js'
+import { setJawOpen, setMorphTarget, ensureMorphState, releaseMorph, startMorphLerp, morphState, morphMap, applyMorphRaw } from './morph.js'
 
 let idleAnimFrame = null
 let idlePhase = 0
@@ -117,7 +117,8 @@ export function animateMouthElapsed() {
             if (state.head && state.head.stopGesture) state.head.stopGesture(500)
             return
         }
-        setJawOpen(0)
+        applyMorphRaw(state.jawMorphName, 0)
+        if (morphState[state.jawMorphName]) morphState[state.jawMorphName].current = 0
         if (state.lastVisemeName) { setMorphTarget(state.lastVisemeName, 0); state.lastVisemeName = null }
         state.mouthAnimFrame = requestAnimationFrame(animateMouthElapsed)
         return
@@ -152,7 +153,13 @@ export function animateMouthElapsed() {
     }
 
     const noise = jawCurrent > 0.15 ? microNoise(0.012) : 0
-    setJawOpen(Math.max(0, jawTarget + noise))
+    const rawJaw = Math.max(0, jawTarget + noise)
+    if (rawJaw < 0.01) {
+        applyMorphRaw(state.jawMorphName, 0)
+        if (morphState[state.jawMorphName]) morphState[state.jawMorphName].current = 0
+    } else {
+        setJawOpen(rawJaw)
+    }
 
     if (current.viseme && morphMap[current.viseme]) {
         const newVn = current.viseme
@@ -206,7 +213,7 @@ export function stopMouthAnimation() {
         state.lastVisemeName = null
     }
     if (state.jawMorphName) {
-        releaseMorph(state.jawMorphName);
+        applyMorphRaw(state.jawMorphName, 0);
         ensureMorphState(state.jawMorphName);
         morphState[state.jawMorphName].current = 0;
         morphState[state.jawMorphName].target = 0

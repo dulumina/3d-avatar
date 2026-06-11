@@ -39,7 +39,7 @@ export const CONSONANT_JAW = {
 
 export const LERP = {
     jawOpen: 14,
-    jawClose: 10,
+    jawClose: 40,
     viseme: 12,
     visemeFade: 10,
     idle: 6,

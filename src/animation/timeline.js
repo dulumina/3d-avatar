@@ -8,7 +8,7 @@ export function buildMouthTimeline(words, rate) {
 
     const BASE_SYL_DUR = 120 / rate    
     const BASE_CODA_DUR = 40 / rate    
-    const WORD_PAUSE = 50 / rate    
+    const WORD_PAUSE = 90 / rate    
 
     for (let w = 0; w < words.length; w++) {
         const clean = cleanWord(words[w])
