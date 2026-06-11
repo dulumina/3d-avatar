@@ -132,8 +132,8 @@ async function speakText(text) {
     }
 
     utterance.onboundary = (e) => {
+        state.lastBoundaryTime = Date.now()
         if (e.name === 'word') {
-            state.lastBoundaryTime = Date.now()
             let spoken = ''
             try { spoken = cleanWord(text.substring(e.charIndex, e.charIndex + e.charLength)) } catch { return }
             if (!spoken) return

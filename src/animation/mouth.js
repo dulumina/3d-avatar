@@ -3,7 +3,7 @@ import { BLINK_INTERVAL, BLINK_DURATION } from '../constants.js'
 import { microNoise, resetNoiseT } from '../utils.js'
 import { setJawOpen, setMorphTarget, ensureMorphState, releaseMorph, startMorphLerp, morphState, morphMap, applyMorphRaw } from './morph.js'
 
-const GAP_THRESHOLD = 300
+const GAP_THRESHOLD = 500
 
 let idleAnimFrame = null
 let idlePhase = 0
