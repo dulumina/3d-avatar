@@ -15,5 +15,10 @@ export const state = {
     selectedVoice: null,
     voicesReady: false,
     gestureSchedule: [],
-    chromeKeepAliveInterval: null
+    chromeKeepAliveInterval: null,
+
+    blinkTimer: null,
+    isBlinking: false,
+    expressionMorphNames: [],
+    currentMood: 'neutral',
 }

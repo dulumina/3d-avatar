@@ -1,5 +1,5 @@
 import { state } from '../state.js'
-import { VOWEL_VISEME_MAP, CONSONANT_JAW } from '../constants.js'
+import { VOWEL_VISEME_MAP, CONSONANT_VISEME_MAP, CONSONANT_JAW } from '../constants.js'
 import { cleanWord, syllabify } from '../utils.js'
 
 export function buildMouthTimeline(words, rate) {
@@ -41,11 +41,13 @@ export function buildMouthTimeline(words, rate) {
             if (onsetDur > 0) {
                 const firstCons = onset[onset.length - 1]?.toLowerCase()
                 const consJaw = CONSONANT_JAW[firstCons] || 0.08
+                const consViseme = CONSONANT_VISEME_MAP[firstCons] || null
                 tl.push({
                     time: cum,
                     endTime: cum + onsetDur,
                     jawOpen: consJaw,
                     vowel: null,
+                    viseme: consViseme,
                     gesture: s === 0 ? gesture : null,
                 })
                 cum += onsetDur
@@ -57,6 +59,7 @@ export function buildMouthTimeline(words, rate) {
                     endTime: cum + nucleusDur,
                     jawOpen: cfg.jaw,
                     vowel: vowel,
+                    viseme: cfg.morph,
                     gesture: onsetDur === 0 && s === 0 ? gesture : null,
                 })
                 cum += nucleusDur
@@ -65,18 +68,20 @@ export function buildMouthTimeline(words, rate) {
             if (codaDur > 0) {
                 const lastCons = coda[0]?.toLowerCase()
                 const consJaw = CONSONANT_JAW[lastCons] || 0.06
+                const consViseme = CONSONANT_VISEME_MAP[lastCons] || null
                 tl.push({
                     time: cum,
                     endTime: cum + codaDur,
                     jawOpen: nucleus ? consJaw : 0,
                     vowel: null,
+                    viseme: consViseme,
                     gesture: null,
                 })
                 cum += codaDur
             }
         }
 
-        tl.push({ time: cum, endTime: cum + WORD_PAUSE, jawOpen: 0, vowel: null, gesture: null })
+        tl.push({ time: cum, endTime: cum + WORD_PAUSE, jawOpen: 0, vowel: null, viseme: null, gesture: null })
         cum += WORD_PAUSE
     }
     return tl

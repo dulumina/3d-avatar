@@ -1,7 +1,7 @@
 import { state } from '../state.js'
-import { LERP } from '../constants.js'
+import { LERP, EXPRESSION_MORPHS, MOOD_EXPRESSION } from '../constants.js'
 
-export const morphState = {}   // { name: { current, target, velocity } }
+export const morphState = {}
 export let morphMap = {}
 let morphLerpFrame = null
 let lastFrameTime = 0
@@ -23,6 +23,30 @@ export function setMorph(name, val) {
     applyMorphRaw(name, val)
 }
 
+export function setExpressionTarget(name, val) {
+    if (!name || !morphMap[name]) return
+    setMorphTarget(name, val)
+}
+
+export function resetExpression(name) {
+    if (!name || !morphMap[name]) return
+    setMorphTarget(name, 0)
+}
+
+export function setMoodExpression(mood) {
+    const expr = MOOD_EXPRESSION[mood]
+    if (!expr) return
+    for (const [name, val] of Object.entries(expr)) {
+        if (morphMap[name]) setMorphTarget(name, val)
+    }
+}
+
+export function clearMoodExpression() {
+    for (const [name] of Object.entries(MOOD_EXPRESSION.neutral || {})) {
+        if (morphMap[name]) setMorphTarget(name, 0)
+    }
+}
+
 export function buildMorphMap(root) {
     const map = {}
     if (!root || typeof root.traverse !== 'function') return map
@@ -42,6 +66,16 @@ export function buildMorphMap(root) {
 
 export function setMorphMap(map) {
     morphMap = map
+}
+
+export function collectExpressionMorphs() {
+    const all = []
+    for (const group of Object.values(EXPRESSION_MORPHS)) {
+        for (const name of group) {
+            if (morphMap[name]) all.push(name)
+        }
+    }
+    return all
 }
 
 export function findAvatarRoot() {
@@ -111,7 +145,7 @@ export function setJawOpen(val) {
 
 export function tickMorphLerp(timestamp) {
     morphLerpFrame = requestAnimationFrame(tickMorphLerp)
-    const dt = Math.min((timestamp - lastFrameTime) / 1000, 0.05) 
+    const dt = Math.min((timestamp - lastFrameTime) / 1000, 0.05)
     lastFrameTime = timestamp
 
     for (const [name, s] of Object.entries(morphState)) {
@@ -123,11 +157,15 @@ export function tickMorphLerp(timestamp) {
             continue
         }
         const isJaw = name === state.jawMorphName
+        const isBlink = /blink/i.test(name)
         let speed
         if (isJaw) {
             speed = s.target > s.current ? LERP.jawOpen : LERP.jawClose
+        } else if (isBlink) {
+            speed = LERP.blink
         } else {
-            speed = s.target < s.current ? LERP.visemeFade : LERP.viseme
+            const isExpression = state.expressionMorphNames.includes(name)
+            speed = isExpression ? LERP.expression : (s.target < s.current ? LERP.visemeFade : LERP.viseme)
         }
         s.current += (s.target - s.current) * Math.min(1, speed * dt)
         applyMorphRaw(name, s.current)

@@ -1,5 +1,5 @@
 import { state } from './state.js'
-import { VOWEL_VISEME_MAP } from './constants.js'
+import { VOWEL_VISEME_MAP, MOOD_EXPRESSION } from './constants.js'
 import { autoResizeTextarea, cleanWord } from './utils.js'
 import { synth, initAudioControls } from './audio.js'
 import { getGestureSchedule } from './ai.js'
@@ -8,7 +8,9 @@ import {
     setMorphMap, 
     findAvatarRoot, 
     startMorphLerp, 
-    morphMap
+    morphMap,
+    collectExpressionMorphs,
+    setMoodExpression,
 } from './animation/morph.js'
 import { buildMouthTimeline } from './animation/timeline.js'
 import { 
@@ -56,6 +58,9 @@ function stopAll() {
     setSpeaking(false)
     stopMouthAnimation()
     if (state.head && state.head.stopGesture) state.head.stopGesture(500)
+    state.currentMood = 'neutral'
+    setMoodExpression('neutral')
+    if (state.head && state.head.setMood) state.head.setMood('neutral')
 }
 
 async function speakText(text) {
@@ -87,7 +92,11 @@ async function speakText(text) {
         }
     }
 
-    if (schedule.mood && state.head && state.head.setMood) state.head.setMood(schedule.mood)
+    if (schedule.mood) {
+        state.currentMood = schedule.mood
+        setMoodExpression(schedule.mood)
+        if (state.head && state.head.setMood) state.head.setMood(schedule.mood)
+    }
 
     const utterance = new SpeechSynthesisUtterance(text)
     if (state.selectedVoice) { utterance.voice = state.selectedVoice; utterance.lang = state.selectedVoice.lang }
@@ -106,11 +115,17 @@ async function speakText(text) {
     utterance.onend = () => {
         if (state.chromeKeepAliveInterval) { clearInterval(state.chromeKeepAliveInterval); state.chromeKeepAliveInterval = null }
         setSpeaking(false)
+        state.currentMood = 'neutral'
+        setMoodExpression('neutral')
+        if (state.head && state.head.setMood) state.head.setMood('neutral')
     }
     utterance.onerror = (e) => {
         console.error('TTS error:', e.error)
         if (state.chromeKeepAliveInterval) { clearInterval(state.chromeKeepAliveInterval); state.chromeKeepAliveInterval = null }
         setSpeaking(false)
+        state.currentMood = 'neutral'
+        setMoodExpression('neutral')
+        if (state.head && state.head.setMood) state.head.setMood('neutral')
     }
 
     utterance.onboundary = (e) => {
@@ -156,7 +171,7 @@ textInput.addEventListener('keydown', (e) => {
 async function initAvatar() {
     state.head = new TalkingHead(container, {
         ttsEndpoint: '',
-        cameraRotateEnable: false, cameraZoomEnable: false, cameraPanEnable: false,
+        cameraView: 'mid', cameraRotateEnable: false, cameraZoomEnable: false, cameraPanEnable: false,
         lightAmbientIntensity: 2.5, lightDirectIntensity: 25,
     })
     
@@ -185,6 +200,9 @@ async function initAvatar() {
         for (const [vowel, cfg] of Object.entries(VOWEL_VISEME_MAP)) {
             if (keys.includes(cfg.morph)) state.visemeMorphNames[vowel] = cfg.morph
         }
+
+        state.expressionMorphNames = collectExpressionMorphs()
+        setMoodExpression('neutral')
 
         if (state.isSpeaking) startMouthAnimation()
         else startIdleAnimation()
