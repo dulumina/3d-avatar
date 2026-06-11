@@ -8,14 +8,15 @@ export function keywordFallback(text, words) {
     const lower = text.toLowerCase()
     const wordList = words || lower.split(/\s+/).filter(w => w.length > 0)
     const map = [
-        { words: ['halo', 'hai', 'selamat', 'salam', 'assalamualaikum', 'selamatpagi', 'selamatsiang', 'selamatmalam'], g: 'handup' },
+        { words: ['halo', 'hai', 'selamat', 'assalamualaikum', 'selamatpagi', 'selamatsiang', 'selamatmalam'], g: 'handup' },
+        { words: ['salam', 'hormatsaya'], g: 'namaste' },
         { words: ['saya', 'aku', 'kami', 'kitah', 'gue', 'gw'], g: 'index' },
         { words: ['kamu', 'anda', 'kau', 'dikau', 'lu', 'elo'], g: 'side' },
         { words: ['tidak', 'bukan', 'jangan', 'nggak', 'ga', 'gak', 'tak'], g: 'shrug' },
         { words: ['iya', 'ya', 'oke', 'ok', 'baik', 'setuju', 'benar', 'tentu'], g: 'ok' },
         { words: ['bagus', 'hebat', 'mantap', 'keren', 'indah', 'cantik', 'baik', 'senang', 'suka'], g: 'thumbup' },
         { words: ['jelek', 'buruk', 'parah', 'payah', 'bodoh', 'tidakbaik'], g: 'thumbdown' },
-        { words: ['terimakasih', 'makasih', 'trims', 'thanks', 'hormat'], g: 'ok' },
+        { words: ['terimakasih', 'makasih', 'trims', 'thanks', 'hormat', 'terimakasihbanyak'], g: 'namaste' },
         { words: ['mungkin', 'kurangtahu', 'bingung', 'entah', 'terserah'], g: 'shrug' },
         { words: ['tolong', 'bantu', 'mohon', 'silakan', 'silahkan'], g: 'ok' },
     ]
@@ -60,6 +61,7 @@ Pilihan gestur:
 - side = menunjuk samping (dia, mereka, sana, situ)
 - shrug = angkat bahu (tidak tahu, mungkin, bingung, ?)
 - ok = tanda OK (juga untuk: terima kasih, hormat, mohon)
+- namaste = tangan bersedekap (hormat, terima kasih, salam)
 
 Tentukan mood: neutral | happy | excited | sad | angry
 

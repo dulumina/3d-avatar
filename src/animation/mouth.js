@@ -126,14 +126,6 @@ export function animateMouthElapsed() {
 
     const current = state.mouthTimeline[curIdx]
 
-    if (current.gesture && curIdx !== state.lastGestureIdx) {
-        state.lastGestureIdx = curIdx
-        if (state.head && state.head.playGesture) {
-            try { state.head.playGesture(current.gesture.gesture, Math.min(current.gesture.duration || 0.8, 0.8)) }
-            catch (e) { console.warn('playGesture failed:', e) }
-        }
-    }
-
     const segDur = current.endTime - current.time
     const segProgress = (elapsed - current.time) / segDur
 
@@ -196,7 +188,7 @@ export function startMouthAnimation() {
     resetNoiseT()
     scheduleNextBlink()
     if (state.mouthTimeline.length > 0) {
-        state.lastGestureIdx = -1; state.lastVisemeName = null
+        state.lastVisemeName = null
     }
     startMorphLerp()
     animateMouthElapsed()

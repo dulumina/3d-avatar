@@ -1,7 +1,7 @@
 export const GEMINI_KEY = 'GEMINI_KEY_REMOVED'
 export const GEMINI_MODELS = ['gemini-3.1-flash-lite', 'gemini-3.5-flash', 'gemini-2.5-flash']
 
-export const GESTURES = ['handup', 'index', 'ok', 'thumbup', 'thumbdown', 'side', 'shrug']
+export const GESTURES = ['handup', 'index', 'ok', 'thumbup', 'thumbdown', 'side', 'shrug', 'namaste']
 
 export const VOWEL_VISEME_MAP = {
     a: { morph: 'viseme_aa', jaw: 0.72 },

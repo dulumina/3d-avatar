@@ -9,7 +9,6 @@ export const state = {
     mouthAnimFrame: null,
     speechStartTime: 0,
     mouthTimeline: [],
-    lastGestureIdx: -1,
     lastVisemeName: null,
     availableVoices: [],
     selectedVoice: null,
