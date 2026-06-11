@@ -3,8 +3,6 @@ import { BLINK_INTERVAL, BLINK_DURATION } from '../constants.js'
 import { microNoise, resetNoiseT } from '../utils.js'
 import { setJawOpen, setMorphTarget, ensureMorphState, releaseMorph, startMorphLerp, morphState, morphMap, applyMorphRaw } from './morph.js'
 
-const GAP_THRESHOLD = 500
-
 let idleAnimFrame = null
 let idlePhase = 0
 let idleBrowPhase = 0
@@ -102,14 +100,6 @@ export function animateMouthElapsed() {
 
     if (now >= nextBlinkTime && !state.isBlinking) {
         doBlink()
-    }
-
-    if (state.lastBoundaryTime > 0 && now - state.lastBoundaryTime > GAP_THRESHOLD) {
-        applyMorphRaw(state.jawMorphName, 0)
-        if (morphState[state.jawMorphName]) morphState[state.jawMorphName].current = 0
-        if (state.lastVisemeName) { setMorphTarget(state.lastVisemeName, 0); state.lastVisemeName = null }
-        state.mouthAnimFrame = requestAnimationFrame(animateMouthElapsed)
-        return
     }
 
     let curIdx = -1

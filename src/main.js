@@ -108,7 +108,6 @@ async function speakText(text) {
 
     utterance.onstart = () => {
         state.speechStartTime = Date.now()
-        state.lastBoundaryTime = Date.now()
         const rate = utterance.rate || 1
         state.mouthTimeline = buildMouthTimeline(words, rate)
         setSpeaking(true)
@@ -132,7 +131,6 @@ async function speakText(text) {
     }
 
     utterance.onboundary = (e) => {
-        state.lastBoundaryTime = Date.now()
         if (e.name === 'word') {
             let spoken = ''
             try { spoken = cleanWord(text.substring(e.charIndex, e.charIndex + e.charLength)) } catch { return }
