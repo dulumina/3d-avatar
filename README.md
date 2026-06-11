@@ -3,6 +3,7 @@
 Avatar 3D presenter berbahasa Indonesia dengan ekspresi wajah, gerakan tangan alami, dan sinkronasi bibir real-time.
 
 **Demo:** https://3d-avatar-psi.vercel.app/
+<img width="962" height="1130" alt="image" src="https://github.com/user-attachments/assets/777113d3-b8d0-4105-95c5-a734e0d17880" />
 
 ## Fitur
 
