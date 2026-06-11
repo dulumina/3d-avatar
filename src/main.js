@@ -175,6 +175,7 @@ async function initAvatar() {
         ttsEndpoint: '',
         cameraView: 'mid', cameraRotateEnable: false, cameraZoomEnable: false, cameraPanEnable: false,
         lightAmbientIntensity: 2.5, lightDirectIntensity: 25,
+        lipsyncModules: [],
     })
     
     try {
