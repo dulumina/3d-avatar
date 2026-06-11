@@ -46,7 +46,12 @@ function setSpeaking(speaking) {
         speakBtn.innerHTML = '&#9632; Berhenti'
         stopIdleAnimation()
         startMorphLerp()
-        if (state.avatarReady) startMouthAnimation()
+        if (state.avatarReady) {
+            startMouthAnimation()
+            if (state.head && state.head.poseTemplates) {
+                state.head.setPoseFromTemplate(state.head.poseTemplates['straight'])
+            }
+        }
     } else {
         speakBtn.innerHTML = '&#9654; Bicara'
     }
@@ -206,6 +211,10 @@ async function initAvatar() {
 
         state.expressionMorphNames = collectExpressionMorphs()
         setMoodExpression('neutral')
+
+        if (state.head && state.head.poseTemplates) {
+            state.head.setPoseFromTemplate(state.head.poseTemplates['straight'], 100)
+        }
 
         if (state.isSpeaking) startMouthAnimation()
         else startIdleAnimation()
