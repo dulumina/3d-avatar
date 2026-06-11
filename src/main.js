@@ -108,6 +108,7 @@ async function speakText(text) {
 
     utterance.onstart = () => {
         state.speechStartTime = Date.now()
+        state.lastBoundaryTime = Date.now()
         const rate = utterance.rate || 1
         state.mouthTimeline = buildMouthTimeline(words, rate)
         setSpeaking(true)
@@ -115,6 +116,7 @@ async function speakText(text) {
     utterance.onend = () => {
         if (state.chromeKeepAliveInterval) { clearInterval(state.chromeKeepAliveInterval); state.chromeKeepAliveInterval = null }
         setSpeaking(false)
+        stopMouthAnimation()
         state.currentMood = 'neutral'
         setMoodExpression('neutral')
         if (state.head && state.head.setMood) state.head.setMood('neutral')
@@ -123,6 +125,7 @@ async function speakText(text) {
         console.error('TTS error:', e.error)
         if (state.chromeKeepAliveInterval) { clearInterval(state.chromeKeepAliveInterval); state.chromeKeepAliveInterval = null }
         setSpeaking(false)
+        stopMouthAnimation()
         state.currentMood = 'neutral'
         setMoodExpression('neutral')
         if (state.head && state.head.setMood) state.head.setMood('neutral')
@@ -130,6 +133,7 @@ async function speakText(text) {
 
     utterance.onboundary = (e) => {
         if (e.name === 'word') {
+            state.lastBoundaryTime = Date.now()
             let spoken = ''
             try { spoken = cleanWord(text.substring(e.charIndex, e.charIndex + e.charLength)) } catch { return }
             if (!spoken) return

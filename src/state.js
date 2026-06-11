@@ -15,6 +15,7 @@ export const state = {
     voicesReady: false,
     gestureSchedule: [],
     chromeKeepAliveInterval: null,
+    lastBoundaryTime: 0,
 
     blinkTimer: null,
     isBlinking: false,
