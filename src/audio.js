@@ -54,26 +54,37 @@ export function populateVoiceSelector(voices, voiceSelect, voiceStatus) {
         return 
     }
     
-    const savedVoiceName = localStorage.getItem(VOICE_STORAGE_KEY)
     let selectedIndex = -1
-    if (savedVoiceName) {
+    
+    // 1. Lock to Veronika if found
+    for (let i = 0; i < voiceSelect.options.length; i++) { 
+        if (/veronika/i.test(voiceSelect.options[i].value)) { selectedIndex = i; break } 
+    }
+    
+    // 2. Fallback to other female Indonesian voice if Veronika is not found
+    if (selectedIndex === -1) {
         for (let i = 0; i < voiceSelect.options.length; i++) { 
-            if (voiceSelect.options[i].value.startsWith(savedVoiceName)) { selectedIndex = i; break } 
+            if (voiceSelect.options[i].dataset.indonesian === 'true' && /gadis|female|perempuan/i.test(voiceSelect.options[i].value)) { selectedIndex = i; break } 
         }
     }
+    
+    // 3. Fallback to any Indonesian voice
     if (selectedIndex === -1) {
         for (let i = 0; i < voiceSelect.options.length; i++) { 
             if (voiceSelect.options[i].dataset.indonesian === 'true') { selectedIndex = i; break } 
         }
     }
+    
     if (selectedIndex === -1) selectedIndex = 0
     
     voiceSelect.selectedIndex = selectedIndex
     updateSelectedVoice(voiceSelect)
-    voiceSelect.disabled = false
+    
+    // Lock the selection
+    voiceSelect.disabled = true
     
     const idCount = sorted.filter(v => isIndonesianVoice(v)).length
-    voiceStatus.textContent = idCount > 0 ? idCount + ' suara Indonesia tersedia' : 'Suara Indonesia tidak tersedia'
+    voiceStatus.textContent = idCount > 0 ? 'Terkunci ke ' + voiceSelect.options[selectedIndex].text : 'Suara Indonesia tidak tersedia'
     voiceStatus.className = idCount > 0 ? 'loaded' : 'error'
     state.voicesReady = true
 }
