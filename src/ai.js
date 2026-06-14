@@ -388,3 +388,38 @@ export async function getGestureSchedule(text) {
     GESTURE_CACHE.set(text, result)
     return result
 }
+
+export async function generateChatResponse(userText, history) {
+    const model = GEMINI_MODELS[0] || 'gemini-1.5-flash'
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`
+    
+    const systemPrompt = "Kamu adalah asisten virtual cerdas bernama AI Avatar. Jawablah setiap pertanyaan dengan bahasa Indonesia yang natural, ramah, dan profesional. Jangan memberikan jawaban yang terlalu panjang, usahakan singkat, padat, dan jelas layaknya percakapan lisan."
+    
+    const contents = [...history, { role: 'user', parts: [{ text: userText }] }]
+    
+    const controller = new AbortController()
+    const timeout = setTimeout(() => controller.abort(), 15000)
+    try {
+        const resp = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': GEMINI_KEY },
+            body: JSON.stringify({
+                systemInstruction: { parts: [{ text: systemPrompt }] },
+                contents: contents,
+                generationConfig: { temperature: 0.7, maxOutputTokens: 1024 }
+            }),
+            signal: controller.signal
+        })
+        clearTimeout(timeout)
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}: ${(await resp.text()).slice(0, 200)}`)
+        const data = await resp.json()
+        const parts = data?.candidates?.[0]?.content?.parts
+        const raw = Array.isArray(parts) ? parts.map(p => p.text).filter(Boolean).join('') : null
+        if (!raw) throw new Error('Gemini: empty response')
+        return raw.trim()
+    } catch (e) {
+        clearTimeout(timeout)
+        console.error('[CHAT] Gemini failed:', e)
+        return "Maaf, saya sedang mengalami gangguan pikiran sesaat. Bisakah Anda mengulanginya?"
+    }
+}

@@ -20,4 +20,5 @@ export const state = {
     isBlinking: false,
     expressionMorphNames: [],
     currentMood: 'neutral',
+    chatHistory: [],
 }

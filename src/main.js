@@ -2,7 +2,7 @@ import { state } from './state.js'
 import { VOWEL_VISEME_MAP, MOOD_EXPRESSION } from './constants.js'
 import { autoResizeTextarea, cleanWord } from './utils.js'
 import { synth, initAudioControls } from './audio.js'
-import { getGestureSchedule } from './ai.js'
+import { getGestureSchedule, generateChatResponse } from './ai.js'
 import { 
     buildMorphMap, 
     setMorphMap, 
@@ -34,7 +34,6 @@ const voiceSelect = document.getElementById('voice-select')
 const voiceStatus = document.getElementById('voice-status')
 const rateSlider = document.getElementById('rate-slider')
 const rateLabel = document.getElementById('rate-label')
-
 const settingsBtn = document.getElementById('settings-btn')
 const settingsModal = document.getElementById('settings-modal')
 const currentMessage = document.getElementById('current-message')
@@ -191,8 +190,48 @@ document.addEventListener('click', resumeAudio, { once: true })
 speakBtn.addEventListener('click', async () => {
     resumeAudio()
     const text = textInput.value.trim()
-    if (!text) textInput.focus()
-    else await speakText(text)
+    if (!text) {
+        textInput.focus()
+        return
+    }
+    
+    // Disable input and button while thinking
+    textInput.disabled = true
+    speakBtn.disabled = true
+    
+    // UI update to show thinking state
+    const originalText = currentMessage.textContent
+    currentMessage.textContent = "Sedang berpikir..."
+    textInput.value = ''
+    autoResizeTextarea(textInput)
+    
+    // Add user message to history
+    state.chatHistory.push({ role: 'user', parts: [{ text: text }] })
+    
+    // Keep history manageable (e.g., last 10 turns)
+    if (state.chatHistory.length > 20) {
+        state.chatHistory = state.chatHistory.slice(state.chatHistory.length - 20)
+    }
+
+    try {
+        const aiResponse = await generateChatResponse(text, state.chatHistory)
+        
+        // Update history with AI response
+        state.chatHistory.push({ role: 'model', parts: [{ text: aiResponse }] })
+        
+        // Show AI response in bubble
+        currentMessage.textContent = aiResponse
+        
+        // Speak the response
+        await speakText(aiResponse)
+    } catch (e) {
+        console.error("Failed to generate response:", e)
+        currentMessage.textContent = "Maaf, terjadi kesalahan saat memproses pesan Anda."
+    } finally {
+        textInput.disabled = false
+        speakBtn.disabled = false
+        textInput.focus()
+    }
 })
 textInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); speakBtn.click() }
