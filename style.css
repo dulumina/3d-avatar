@@ -1,3 +1,7 @@
+html, body {
+    height: 100%;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -7,7 +11,7 @@
 body {
     font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
     background: #0d0f17; /* Dark background similar to mockup */
-    height: 100vh;
+    height: 100dvh; /* Use dynamic viewport height for mobile */
     overflow: hidden;
     color: #fff;
     /* Try to emulate mobile dimensions for desktop viewing, but keep it responsive */
@@ -19,7 +23,7 @@ body {
     position: relative;
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100%; /* Fill the body/dvh */
     width: 100%;
     max-width: 450px; /* Mobile width */
     background: #0d0f17;
