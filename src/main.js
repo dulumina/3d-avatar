@@ -125,8 +125,13 @@ async function speakText(text) {
     }
 
     const utterance = new SpeechSynthesisUtterance(text)
-    if (state.selectedVoice) { utterance.voice = state.selectedVoice; utterance.lang = state.selectedVoice.lang }
-    else utterance.lang = 'id-ID'
+    utterance.lang = 'id-ID' // Paksa selalu gunakan bahasa Indonesia
+    
+    // Jika ada suara yang terpilih dan itu adalah suara bahasa Indonesia, gunakan itu
+    if (state.selectedVoice && (state.selectedVoice.lang.startsWith('id') || /indonesia/i.test(state.selectedVoice.name))) { 
+        utterance.voice = state.selectedVoice 
+    }
+    
     utterance.rate = Math.round(parseFloat(rateSlider.value) * 10) / 10 || 1.0
     utterance.pitch = 1.0; utterance.volume = 1.0
 

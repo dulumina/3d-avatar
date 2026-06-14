@@ -393,7 +393,7 @@ export async function generateChatResponse(userText, history) {
     const model = GEMINI_MODELS[0] || 'gemini-1.5-flash'
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`
     
-    const systemPrompt = "Kamu adalah asisten virtual cerdas bernama AI Avatar. Jawablah setiap pertanyaan dengan bahasa Indonesia yang natural, ramah, dan profesional. Jangan memberikan jawaban yang terlalu panjang, usahakan singkat, padat, dan jelas layaknya percakapan lisan."
+    const systemPrompt = "Kamu adalah asisten virtual cerdas bernama AI Avatar. Kamu WAJIB MERESPON HANYA MENGGUNAKAN BAHASA INDONESIA dalam segala situasi, terlepas dari bahasa apa pun yang digunakan oleh pengguna atau dari negara mana pun mereka berasal. Jawablah setiap pertanyaan dengan bahasa Indonesia yang natural, ramah, dan profesional. Usahakan singkat, padat, dan jelas layaknya percakapan lisan."
     
     const contents = [...history, { role: 'user', parts: [{ text: userText }] }]
     
