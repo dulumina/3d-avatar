@@ -1,4 +1,5 @@
 export const GEMINI_KEY = import.meta.env.VITE_GEMINI_KEY || ''
+export const GOOGLE_TTS_KEY = import.meta.env.VITE_GOOGLE_TTS_KEY || ''
 export const GEMINI_MODELS = ['gemini-3.1-flash-lite', 'gemini-3.5-flash', 'gemini-2.5-flash']
 
 export const GESTURES = ['handup', 'index', 'ok', 'thumbup', 'thumbdown', 'side', 'shrug', 'namaste']

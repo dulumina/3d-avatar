@@ -2,7 +2,7 @@ import { state } from './state.js'
 import { VOWEL_VISEME_MAP, MOOD_EXPRESSION } from './constants.js'
 import { autoResizeTextarea, cleanWord } from './utils.js'
 import { synth, initAudioControls } from './audio.js'
-import { getGestureSchedule, generateChatResponse } from './ai.js'
+import { getGestureSchedule, generateChatResponse, generateTTSAudio } from './ai.js'
 import { 
     buildMorphMap, 
     setMorphMap, 
@@ -67,6 +67,7 @@ function setSpeaking(speaking) {
 function stopAll() {
     if (state.chromeKeepAliveInterval) { clearInterval(state.chromeKeepAliveInterval); state.chromeKeepAliveInterval = null }
     if (synth) synth.cancel()
+    if (state.currentAudio) { state.currentAudio.pause(); state.currentAudio.currentTime = 0; }
     setSpeaking(false)
     stopMouthAnimation()
     if (state.head && state.head.stopGesture) state.head.stopGesture(500)
@@ -76,9 +77,9 @@ function stopAll() {
 }
 
 async function speakText(text) {
-    if (!synth) { console.warn('SpeechSynthesis not available'); return }
     if (!text) return
-    if (synth.speaking) { stopAll(); return }
+    if (state.currentAudio && !state.currentAudio.paused) { stopAll(); return }
+    if (synth && synth.speaking) { stopAll(); return }
     if (state.isAnalyzing) return
 
     state.isAnalyzing = true
@@ -124,81 +125,60 @@ async function speakText(text) {
         if (state.head && state.head.setMood) state.head.setMood(schedule.mood)
     }
 
-    const utterance = new SpeechSynthesisUtterance(text)
-    utterance.lang = 'id-ID' // Paksa selalu gunakan bahasa Indonesia
-    
-    let targetVoice = null;
-    
-    // Jika ada suara yang terpilih di state dan itu adalah suara bahasa Indonesia
-    if (state.selectedVoice && (state.selectedVoice.lang.startsWith('id') || /indonesia/i.test(state.selectedVoice.name))) { 
-        targetVoice = state.selectedVoice 
-    } else {
-        // Coba ambil list suara terbaru (karena di HP kadang voice telat ter-load)
-        const voices = window.speechSynthesis.getVoices()
-        // Coba cari Veronika/Damayanti/Female dulu
-        targetVoice = voices.find(v => (v.lang.startsWith('id') || /indonesia/i.test(v.name)) && /veronika|damayanti|female|gadis/i.test(v.name))
-        // Jika tidak ada, ambil suara Indonesia apa saja
-        if (!targetVoice) {
-            targetVoice = voices.find(v => v.lang.startsWith('id') || /indonesia/i.test(v.name))
-        }
+    let audioUrl;
+    try {
+        audioUrl = await generateTTSAudio(text)
+    } catch (err) {
+        console.error("Gagal men-generate TTS Audio:", err)
+        speakBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>'
+        setTimeout(() => setSpeaking(false), 2000)
+        return
     }
-    
-    if (targetVoice) {
-        utterance.voice = targetVoice
-    }
-    
-    utterance.rate = Math.round(parseFloat(rateSlider.value) * 10) / 10 || 1.0
-    utterance.pitch = 1.0; utterance.volume = 1.0
 
-    utterance.onstart = () => {
+    const audio = new Audio(audioUrl)
+    audio.playbackRate = Math.round(parseFloat(rateSlider.value) * 10) / 10 || 1.0
+
+    audio.onplay = () => {
         state.speechStartTime = Date.now()
-        const rate = utterance.rate || 1
+        const rate = audio.playbackRate
         state.mouthTimeline = buildMouthTimeline(words, rate)
         setSpeaking(true)
+        
+        // Simulasikan event onboundary menggunakan timer
+        // Kita perkirakan durasi kasar per kata jika audio.duration belum tersedia dengan akurat
+        const estDuration = audio.duration && audio.duration !== Infinity ? audio.duration : (words.length * 0.4)
+        const timePerWord = estDuration / words.length
+        
+        words.forEach((w, wordIdx) => {
+            setTimeout(() => {
+                if (state.currentAudio !== audio) return // Berhenti jika audio diganti
+                const match = state.gestureWordMap.get(wordIdx)
+                if (match) {
+                    if (state.head && state.head.armature && state.head.playGesture) {
+                        try { state.head.playGesture(match.gesture, match.duration || 2) }
+                        catch (e) { }
+                    }
+                }
+            }, wordIdx * timePerWord * 1000)
+        })
     }
-    utterance.onend = () => {
-        if (state.chromeKeepAliveInterval) { clearInterval(state.chromeKeepAliveInterval); state.chromeKeepAliveInterval = null }
+
+    audio.onended = () => {
         setSpeaking(false)
         stopMouthAnimation()
         state.currentMood = 'neutral'
         setMoodExpression('neutral')
         if (state.head && state.head.setMood) state.head.setMood('neutral')
     }
-    utterance.onerror = (e) => {
-        console.error('TTS error:', e.error)
-        if (state.chromeKeepAliveInterval) { clearInterval(state.chromeKeepAliveInterval); state.chromeKeepAliveInterval = null }
-        setSpeaking(false)
-        stopMouthAnimation()
-        state.currentMood = 'neutral'
-        setMoodExpression('neutral')
-        if (state.head && state.head.setMood) state.head.setMood('neutral')
+
+    audio.onerror = (e) => {
+        console.error('Audio playback error:', e)
+        audio.onended()
     }
 
-    utterance.onboundary = (e) => {
-        const wordIdx = text.substring(0, e.charIndex).split(/\s+/).filter(w => w.length > 0).length
-        console.log('[GESTURE] onboundary event name:', e.name, 'wordIdx:', wordIdx, 'charIndex:', e.charIndex)
-        const match = state.gestureWordMap.get(wordIdx)
-        if (match) {
-            if (state.head && state.head.armature && state.head.playGesture) {
-                console.log('[GESTURE] -> memainkan', match.gesture, 'durasi', match.duration)
-                try { state.head.playGesture(match.gesture, match.duration || 2) }
-                catch (e) { console.warn('[GESTURE] playGesture error:', e) }
-            } else {
-                console.warn('[GESTURE] -> head/armature belum siap, skip gesture')
-            }
-        } else {
-            console.log('[GESTURE] -> tidak ada jadwal di index ini')
-        }
-    }
-
-    synth.speak(utterance)
-
-    if (state.chromeKeepAliveInterval) clearInterval(state.chromeKeepAliveInterval)
-    state.chromeKeepAliveInterval = setInterval(() => {
-        if (!synth.speaking) { clearInterval(state.chromeKeepAliveInterval); state.chromeKeepAliveInterval = null; return }
-        synth.pause()
-        synth.resume()
-    }, 10000)
+    if (state.currentAudio) state.currentAudio.pause()
+    state.currentAudio = audio
+    audio.play()
 }
 
 function resumeAudio() {

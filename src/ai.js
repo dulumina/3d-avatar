@@ -423,3 +423,44 @@ export async function generateChatResponse(userText, history) {
         return "Maaf, saya sedang mengalami gangguan pikiran sesaat. Bisakah Anda mengulanginya?"
     }
 }
+
+export async function generateTTSAudio(text) {
+    // Membutuhkan VITE_GOOGLE_TTS_KEY di .env
+    const apiKey = import.meta.env.VITE_GOOGLE_TTS_KEY || import.meta.env.VITE_GEMINI_KEY
+    if (!apiKey) {
+        throw new Error("Google TTS API Key is missing")
+    }
+
+    const url = `https://texttospeech.googleapis.com/v1/text:synthesize?key=${apiKey}`
+
+    const requestBody = {
+        input: { text: text },
+        voice: {
+            languageCode: 'id-ID',
+            name: 'id-ID-Standard-A', // Suara wanita Indonesia
+        },
+        audioConfig: {
+            audioEncoding: 'MP3',
+            speakingRate: 1.0,
+            pitch: 0.0
+        }
+    }
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody)
+    })
+
+    if (!response.ok) {
+        const errText = await response.text()
+        throw new Error(`Google TTS API failed: ${response.status} - ${errText}`)
+    }
+
+    const data = await response.json()
+    // data.audioContent adalah string Base64 dari file MP3
+    const audioUrl = `data:audio/mp3;base64,${data.audioContent}`
+    return audioUrl
+}
