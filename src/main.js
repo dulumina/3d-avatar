@@ -35,6 +35,14 @@ const voiceStatus = document.getElementById('voice-status')
 const rateSlider = document.getElementById('rate-slider')
 const rateLabel = document.getElementById('rate-label')
 
+const settingsBtn = document.getElementById('settings-btn')
+const settingsModal = document.getElementById('settings-modal')
+const currentMessage = document.getElementById('current-message')
+
+settingsBtn.addEventListener('click', () => {
+    settingsModal.classList.toggle('hidden')
+})
+
 // Initialize audio
 initAudioControls(voiceSelect, voiceStatus, rateSlider, rateLabel, speakBtn)
 textInput.addEventListener('input', () => autoResizeTextarea(textInput))
@@ -43,7 +51,7 @@ autoResizeTextarea(textInput)
 function setSpeaking(speaking) {
     state.isSpeaking = speaking
     if (speaking) {
-        speakBtn.innerHTML = '&#9632; Berhenti'
+        speakBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="white" stroke="none"><rect x="6" y="6" width="12" height="12"></rect></svg>'
         stopIdleAnimation()
         startMorphLerp()
         if (state.avatarReady) {
@@ -53,7 +61,7 @@ function setSpeaking(speaking) {
             }
         }
     } else {
-        speakBtn.innerHTML = '&#9654; Bicara'
+        speakBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>'
     }
 }
 
@@ -75,7 +83,7 @@ async function speakText(text) {
     if (state.isAnalyzing) return
 
     state.isAnalyzing = true
-    speakBtn.innerHTML = 'Menganalisis...'
+    speakBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83" class="spinner"></path></svg>'
     speakBtn.disabled = true
 
     const words = text.split(/\s+/).filter(w => w.length > 0)

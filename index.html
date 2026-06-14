@@ -12,10 +12,13 @@
 
 <body>
     <div id="container">
-        <div id="avatar-container"></div>
-        <div id="controls">
-            <textarea id="text-input" placeholder="Ketik teks untuk avatar bicara..." rows="1">Pemerintah Kota Palu menggelar kegiatan penanaman seribu pohon di sejumlah kawasan ruang terbuka hijau pada Kamis pagi. Kegiatan tersebut melibatkan berbagai elemen masyarakat, mulai dari pelajar, komunitas lingkungan, hingga aparatur pemerintah daerah. Wali Kota menyampaikan bahwa program ini bertujuan meningkatkan kualitas udara, mengurangi dampak perubahan iklim, serta menumbuhkan kesadaran masyarakat akan pentingnya menjaga kelestarian lingkungan. Acara berlangsung lancar dan mendapat antusiasme tinggi dari warga yang turut berpartisipasi dalam penanaman pohon di beberapa titik kota.
-            </textarea>
+        <!-- Floating Settings Icon -->
+        <button id="settings-btn" title="Settings">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+
+        <!-- Hidden Settings Modal -->
+        <div id="settings-modal" class="hidden">
             <div id="voice-controls">
                 <select id="voice-select" title="Pilih suara"></select>
                 <div id="voice-status">Memuat suara...</div>
@@ -24,7 +27,36 @@
                 <input type="range" id="rate-slider" min="0.5" max="2" step="0.1" value="1.0">
                 <span id="rate-label">1.0x</span>
             </div>
-            <button id="speak-btn">&#9654; Bicara</button>
+        </div>
+
+        <div id="avatar-container"></div>
+        
+        <!-- Chat Interface -->
+        <div id="chat-interface">
+            <div id="chat-messages">
+                <div class="message-bubble" id="current-message">
+                    Pemerintah Kota Palu menggelar kegiatan penanaman seribu pohon di sejumlah kawasan ruang terbuka hijau pada Kamis pagi. Kegiatan tersebut melibatkan berbagai elemen masyarakat, mulai dari pelajar, komunitas lingkungan, hingga aparatur pemerintah daerah. Wali Kota menyampaikan bahwa program ini bertujuan meningkatkan kualitas udara, mengurangi dampak perubahan iklim, serta menumbuhkan kesadaran masyarakat akan pentingnya menjaga kelestarian lingkungan. Acara berlangsung lancar dan mendapat antusiasme tinggi dari warga yang turut berpartisipasi dalam penanaman pohon di beberapa titik kota.
+                </div>
+            </div>
+            <div id="input-area">
+                <button id="add-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                </button>
+                <div id="text-input-wrapper">
+                    <textarea id="text-input" placeholder="Tulis pesan Anda di sini..." rows="1"></textarea>
+                    <div class="input-icons">
+                        <button class="icon-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                        </button>
+                        <button class="icon-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        </button>
+                    </div>
+                </div>
+                <button id="speak-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </div>
         </div>
     </div>
 
