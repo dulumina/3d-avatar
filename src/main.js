@@ -78,8 +78,22 @@ async function speakText(text) {
     speakBtn.innerHTML = 'Menganalisis...'
     speakBtn.disabled = true
 
+    const words = text.split(/\s+/).filter(w => w.length > 0)
     const schedule = await getGestureSchedule(text)
     state.gestureSchedule = schedule.gestures || []
+    console.log('[GESTURE] schedule dari AI:', JSON.stringify(state.gestureSchedule))
+
+    state.gestureWordMap = new Map()
+    for (const g of state.gestureSchedule) {
+        const cleanTarget = cleanWord(g.word)
+        const idx = words.findIndex(w => cleanWord(w) === cleanTarget)
+        if (idx >= 0) {
+            console.log('[GESTURE] map wordIndex:', idx, '->', g.gesture, '(word:', g.word, ')')
+            state.gestureWordMap.set(idx, g)
+        } else {
+            console.warn('[GESTURE] kata tidak ditemukan di teks:', g.word)
+        }
+    }
 
     state.isAnalyzing = false
     speakBtn.disabled = false
@@ -109,8 +123,6 @@ async function speakText(text) {
     utterance.rate = Math.round(parseFloat(rateSlider.value) * 10) / 10 || 1.0
     utterance.pitch = 1.0; utterance.volume = 1.0
 
-    const words = text.split(/\s+/).filter(w => w.length > 0)
-
     utterance.onstart = () => {
         state.speechStartTime = Date.now()
         const rate = utterance.rate || 1
@@ -136,15 +148,19 @@ async function speakText(text) {
     }
 
     utterance.onboundary = (e) => {
-        if (e.name === 'word') {
-            let spoken = ''
-            try { spoken = cleanWord(text.substring(e.charIndex, e.charIndex + e.charLength)) } catch { return }
-            if (!spoken) return
-            const match = state.gestureSchedule.find(g => cleanWord(g.word) === spoken)
-            if (match && state.head && state.head.playGesture) {
+        const wordIdx = text.substring(0, e.charIndex).split(/\s+/).filter(w => w.length > 0).length
+        console.log('[GESTURE] onboundary event name:', e.name, 'wordIdx:', wordIdx, 'charIndex:', e.charIndex)
+        const match = state.gestureWordMap.get(wordIdx)
+        if (match) {
+            if (state.head && state.head.armature && state.head.playGesture) {
+                console.log('[GESTURE] -> memainkan', match.gesture, 'durasi', match.duration)
                 try { state.head.playGesture(match.gesture, match.duration || 2) }
-                catch (e) { console.warn('playGesture failed:', e) }
+                catch (e) { console.warn('[GESTURE] playGesture error:', e) }
+            } else {
+                console.warn('[GESTURE] -> head/armature belum siap, skip gesture')
             }
+        } else {
+            console.log('[GESTURE] -> tidak ada jadwal di index ini')
         }
     }
 

@@ -378,12 +378,13 @@ export async function getGestureSchedule(text) {
     let result, lastErr
     for (const model of GEMINI_MODELS) {
         try { result = await analyzeTextWithGemini(text, model); lastErr = null; break }
-        catch (e) { lastErr = e; console.warn(`Gemini ${model} failed:`, e.message || e) }
+        catch (e) { lastErr = e; console.warn(`[GESTURE] Gemini ${model} failed:`, e.message || e) }
     }
     if (!result || !Array.isArray(result.gestures)) {
-        if (lastErr) console.warn('All Gemini models failed, using fallback:', lastErr.message || lastErr)
+        if (lastErr) console.warn('[GESTURE] All Gemini models failed, using fallback:', lastErr.message || lastErr)
         result = await keywordFallback(text, words)
     }
+    console.log('[GESTURE] result:', JSON.stringify(result))
     GESTURE_CACHE.set(text, result)
     return result
 }
