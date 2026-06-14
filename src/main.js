@@ -127,9 +127,24 @@ async function speakText(text) {
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = 'id-ID' // Paksa selalu gunakan bahasa Indonesia
     
-    // Jika ada suara yang terpilih dan itu adalah suara bahasa Indonesia, gunakan itu
+    let targetVoice = null;
+    
+    // Jika ada suara yang terpilih di state dan itu adalah suara bahasa Indonesia
     if (state.selectedVoice && (state.selectedVoice.lang.startsWith('id') || /indonesia/i.test(state.selectedVoice.name))) { 
-        utterance.voice = state.selectedVoice 
+        targetVoice = state.selectedVoice 
+    } else {
+        // Coba ambil list suara terbaru (karena di HP kadang voice telat ter-load)
+        const voices = window.speechSynthesis.getVoices()
+        // Coba cari Veronika/Damayanti/Female dulu
+        targetVoice = voices.find(v => (v.lang.startsWith('id') || /indonesia/i.test(v.name)) && /veronika|damayanti|female|gadis/i.test(v.name))
+        // Jika tidak ada, ambil suara Indonesia apa saja
+        if (!targetVoice) {
+            targetVoice = voices.find(v => v.lang.startsWith('id') || /indonesia/i.test(v.name))
+        }
+    }
+    
+    if (targetVoice) {
+        utterance.voice = targetVoice
     }
     
     utterance.rate = Math.round(parseFloat(rateSlider.value) * 10) / 10 || 1.0
